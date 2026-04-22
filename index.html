@@ -91,9 +91,20 @@
 
     a-scene {
       position: fixed !important;
-      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
+      z-index: 1 !important;
+    }
+
+    canvas {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -118,9 +129,10 @@
   </div>
 
   <a-scene
+    renderer="alpha: true; antialias: true; logarithmicDepthBuffer: true; colorManagement: true;"
     vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true; colorManagement: true;"
-    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    device-orientation-permission-ui="enabled: false"
+    arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;"
   >
     <a-assets>
       <img id="panelBg" src="https://cdn.aframe.io/a-painter/images/floor.jpg" alt="panel background">
