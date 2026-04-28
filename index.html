@@ -1,250 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-  <title>AR Student Decision Support</title>
+  <title>AR Student Decision Support System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <!-- AR.js for marker-based AR -->
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
-    html, body {
+    body {
       margin: 0;
-      width: 100%;
-      height: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
-      background: #000;
-      touch-action: manipulation;
     }
 
-    body {
+    #infoBox {
       position: fixed;
-      inset: 0;
-    }
-
-    .overlay {
-      position: fixed;
-      top: max(10px, env(safe-area-inset-top));
+      top: 10px;
       left: 10px;
       right: 10px;
-      z-index: 999;
-      background: rgba(0, 0, 0, 0.72);
-      color: #fff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      line-height: 1.35;
-      font-size: 13px;
-    }
-
-    .legend {
-      position: fixed;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      left: 10px;
-      z-index: 999;
-      background: rgba(255, 255, 255, 0.92);
-      color: #111;
-      padding: 9px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      line-height: 1.4;
-      max-width: 210px;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 6px;
-    }
-
-    .controls {
-      position: fixed;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      right: 10px;
-      z-index: 999;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      max-width: 180px;
-    }
-
-    button {
-      border: none;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 12px;
       border-radius: 8px;
-      padding: 9px 10px;
-      cursor: pointer;
-      background: #ffffff;
-      color: #111;
-      font-weight: 600;
-      font-size: 12px;
-    }
-
-    button:hover {
-      background: #e9e9e9;
-    }
-
-    a-scene {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      z-index: 1 !important;
-    }
-
-    canvas {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover;
+      z-index: 10;
+      font-size: 14px;
     }
   </style>
 </head>
+
 <body>
-  <div class="overlay">
-    <strong>AR Student Decision Support System</strong><br>
-    Point your camera at the <strong>Hiro marker</strong> shown on <strong>printed paper or another screen</strong>. The 3D bars show <strong>Noise</strong>, <strong>Crowd</strong>, and <strong>Comfort</strong> for a study area.
-  </div>
 
-  <div class="legend" id="legendBox">
-    <div><span class="dot" style="background:#e53935"></span>Noise level</div>
-    <div><span class="dot" style="background:#fb8c00"></span>Crowd density</div>
-    <div><span class="dot" style="background:#43a047"></span>Comfort level</div>
-    <hr>
-    <div id="recommendationText"><strong>Recommendation:</strong> Quiet study area</div>
-  </div>
+<div id="infoBox">
+  <b>AR Student Decision Support System</b><br>
+  Point your camera at the HIRO marker.<br>
+  Green = good, Yellow = moderate, Red = poor study condition.
+</div>
 
-  <div class="controls">
-    <button onclick="setScenario('quiet')">Quiet Area</button>
-    <button onclick="setScenario('moderate')">Moderate Area</button>
-    <button onclick="setScenario('busy')">Busy Area</button>
-  </div>
+<a-scene
+  embedded
+  arjs="sourceType: webcam; debugUIEnabled: false;"
+  renderer="logarithmicDepthBuffer: true;"
+  vr-mode-ui="enabled: false">
 
-  <a-scene
-    renderer="alpha: true; antialias: true; logarithmicDepthBuffer: true; colorManagement: true;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;"
-  >
-    <a-assets>
-      <img id="panelBg" src="https://cdn.aframe.io/a-painter/images/floor.jpg" alt="panel background">
-    </a-assets>
+  <a-marker preset="hiro">
 
-    <!-- Hiro marker -->
-    <a-marker preset="hiro">
-      <!-- Base platform -->
-      <a-box position="0 0.05 0" depth="1.6" height="0.1" width="1.6" color="#455A64"></a-box>
+    <!-- Base platform -->
+    <a-box position="0 0 0" scale="3 0.1 2" color="#222222"></a-box>
 
-      <!-- Title panel -->
-      <a-plane position="0 1.45 0" rotation="-90 0 0" width="1.2" height="0.42" color="#1E88E5"></a-plane>
-      <a-text
-        value="Study Environment Dashboard"
-        position="-0.48 1.46 0.01"
-        rotation="-90 0 0"
-        width="2.2"
-        color="#FFFFFF"
-      ></a-text>
+    <!-- Title panel -->
+    <a-text
+      value="Study Space Analysis"
+      position="-1.35 1.7 -0.8"
+      rotation="-90 0 0"
+      color="white"
+      width="4">
+    </a-text>
 
-      <!-- Noise bar -->
-      <a-box id="noiseBar" position="-0.45 0.35 0" depth="0.25" width="0.25" height="0.6" color="#e53935"></a-box>
-      <a-text value="Noise" position="-0.60 0.05 0.18" rotation="-90 0 0" width="1.4" color="#FFFFFF"></a-text>
+    <!-- Noise bar -->
+    <a-box
+      position="-0.9 0.45 0"
+      scale="0.35 0.9 0.35"
+      color="red"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
+    </a-box>
 
-      <!-- Crowd bar -->
-      <a-box id="crowdBar" position="0 0.25 0" depth="0.25" width="0.25" height="0.4" color="#fb8c00"></a-box>
-      <a-text value="Crowd" position="-0.15 0.05 0.18" rotation="-90 0 0" width="1.4" color="#FFFFFF"></a-text>
+    <a-text
+      value="Noise: High"
+      position="-1.25 1.05 0.45"
+      rotation="-90 0 0"
+      color="white"
+      width="3">
+    </a-text>
 
-      <!-- Comfort bar -->
-      <a-box id="comfortBar" position="0.45 0.45 0" depth="0.25" width="0.25" height="0.8" color="#43a047"></a-box>
-      <a-text value="Comfort" position="0.26 0.05 0.18" rotation="-90 0 0" width="1.6" color="#FFFFFF"></a-text>
+    <!-- Crowd bar -->
+    <a-box
+      position="0 0.3 0"
+      scale="0.35 0.6 0.35"
+      color="yellow">
+    </a-box>
 
-      <!-- Floating recommendation panel -->
-      <a-plane id="infoPanel" position="0 0.65 -0.55" width="1.3" height="0.55" color="#FAFAFA"></a-plane>
-      <a-text id="areaLabel" value="Area: Library Zone" position="-0.55 0.78 -0.54" width="2.2" color="#111111"></a-text>
-      <a-text id="suitabilityLabel" value="Suitability: High" position="-0.55 0.65 -0.54" width="2.2" color="#111111"></a-text>
-      <a-text id="adviceLabel" value="Best for focused individual study" position="-0.55 0.52 -0.54" width="2.2" color="#111111"></a-text>
+    <a-text
+      value="Crowd: Medium"
+      position="-0.45 0.9 0.45"
+      rotation="-90 0 0"
+      color="white"
+      width="3">
+    </a-text>
 
-      <!-- Small animated icon -->
-      <a-sphere
-        id="statusOrb"
-        position="0 1.05 -0.4"
-        radius="0.08"
-        color="#43A047"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 3500; easing: linear"
-      ></a-sphere>
-    </a-marker>
+    <!-- Comfort bar -->
+    <a-box
+      position="0.9 0.65 0"
+      scale="0.35 1.3 0.35"
+      color="green">
+    </a-box>
 
-    <a-entity camera></a-entity>
-  </a-scene>
+    <a-text
+      value="Comfort: Good"
+      position="0.45 1.4 0.45"
+      rotation="-90 0 0"
+      color="white"
+      width="3">
+    </a-text>
 
-  <script>
-    const scenarios = {
-      quiet: {
-        area: 'Library Zone',
-        noise: 0.4,
-        crowd: 0.3,
-        comfort: 0.9,
-        suitability: 'High',
-        advice: 'Best for focused individual study',
-        recommendation: 'Recommendation: Quiet study area',
-        orbColor: '#43A047'
-      },
-      moderate: {
-        area: 'Cafe Study Corner',
-        noise: 0.6,
-        crowd: 0.55,
-        comfort: 0.65,
-        suitability: 'Medium',
-        advice: 'Suitable for casual revision or short sessions',
-        recommendation: 'Recommendation: Acceptable for light study',
-        orbColor: '#FDD835'
-      },
-      busy: {
-        area: 'Student Hub',
-        noise: 0.9,
-        crowd: 0.85,
-        comfort: 0.35,
-        suitability: 'Low',
-        advice: 'Avoid for quiet study; better for group meetings',
-        recommendation: 'Recommendation: Not suitable for focused study',
-        orbColor: '#E53935'
-      }
-    };
+    <!-- Recommendation board -->
+    <a-plane
+      position="0 1.6 -0.75"
+      rotation="-90 0 0"
+      width="2.8"
+      height="0.7"
+      color="#003366">
+    </a-plane>
 
-    function updateBar(id, value) {
-      const bar = document.getElementById(id);
-      const height = Math.max(0.15, value);
-      const y = 0.05 + height / 2;
-      bar.setAttribute('height', height.toFixed(2));
-      const pos = bar.getAttribute('position');
-      bar.setAttribute('position', `${pos.x} ${y.toFixed(2)} ${pos.z}`);
-    }
+    <a-text
+      value="Recommendation: Suitable for short study, but not ideal for deep focus."
+      position="-1.25 1.62 -0.73"
+      rotation="-90 0 0"
+      color="white"
+      width="3">
+    </a-text>
 
-    function setScenario(name) {
-      const s = scenarios[name];
-      if (!s) return;
+  </a-marker>
 
-      updateBar('noiseBar', s.noise);
-      updateBar('crowdBar', s.crowd);
-      updateBar('comfortBar', s.comfort);
+  <a-entity camera></a-entity>
+</a-scene>
 
-      document.getElementById('areaLabel').setAttribute('value', `Area: ${s.area}`);
-      document.getElementById('suitabilityLabel').setAttribute('value', `Suitability: ${s.suitability}`);
-      document.getElementById('adviceLabel').setAttribute('value', s.advice);
-      document.getElementById('recommendationText').innerHTML = `<strong>${s.recommendation}</strong>`;
-      document.getElementById('statusOrb').setAttribute('color', s.orbColor);
-    }
-
-    window.addEventListener('load', () => {
-      setScenario('quiet');
-    });
-  </script>
 </body>
 </html>
