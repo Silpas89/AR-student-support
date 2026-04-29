@@ -13,7 +13,7 @@
   <!-- AR.js -->
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
     body {
@@ -149,9 +149,9 @@
 
 <script>
 
-let comfort, noise, crowd;
+let comfort = 6, noise = 5, crowd = 5;
 
-// distance formula
+// -------------------- DISTANCE --------------------
 function getDistance(lat1, lon1, lat2, lon2) {
   let R = 6371;
   let dLat = (lat2-lat1) * Math.PI/180;
@@ -165,11 +165,16 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// Bangor sample locations
+// -------------------- LOCATIONS --------------------
 const library = {lat:53.2280, lon:-4.1290};
 const canteen = {lat:53.2275, lon:-4.1280};
 
-// assign values based on location
+// -------------------- SIMULATION VARIATION --------------------
+function vary(value){
+  return Math.max(1, Math.min(10, value + (Math.random()*2 - 1)));
+}
+
+// -------------------- SET ENVIRONMENT --------------------
 function setEnvironment(lat, lon) {
 
   let dLib = getDistance(lat, lon, library.lat, library.lon);
@@ -177,81 +182,103 @@ function setEnvironment(lat, lon) {
 
   let locText = document.getElementById("locationText");
 
-  if(dLib < 0.05) {
+  if(dLib < 0.05){
     comfort = 8; noise = 2; crowd = 3;
-    locText.innerText = "📚 Library (Quiet Zone)";
+    locText.innerText = "📚 Library (Quiet)";
   }
-  else if(dCan < 0.05) {
+  else if(dCan < 0.05){
     comfort = 4; noise = 8; crowd = 8;
-    locText.innerText = "🍽️ Canteen (Busy Zone)";
+    locText.innerText = "🍽️ Canteen (Busy)";
   }
-  else {
+  else{
     comfort = 6; noise = 5; crowd = 5;
-    locText.innerText = "🏫 General Campus";
+    locText.innerText = "🏫 Campus (Moderate)";
   }
 
   updateBars();
   evaluate();
 }
 
-// scale bars
-function scale(v) {
-  return 0.2 + (v / 10) * 1.5;
+// -------------------- SCALE --------------------
+function scale(v){
+  return 0.2 + (v/10)*1.5;
 }
 
-// update graph
-function updateBars() {
+// -------------------- ANIMATION --------------------
+function animateBar(bar, height, x){
+  bar.setAttribute("animation__height", {
+    property: "height",
+    to: height,
+    dur: 600
+  });
 
-  let cH = scale(comfort);
-  let nH = scale(noise);
-  let crH = scale(crowd);
+  bar.setAttribute("animation__pos", {
+    property: "position",
+    to: `${x} ${height/2} 0`,
+    dur: 600
+  });
+}
+
+// -------------------- UPDATE GRAPH --------------------
+function updateBars(){
 
   let cBar = document.querySelector("#comfortBar");
   let nBar = document.querySelector("#noiseBar");
   let crBar = document.querySelector("#crowdBar");
 
-  cBar.setAttribute("height", cH);
-  cBar.setAttribute("position", `-0.8 ${cH/2} 0`);
+  let cH = scale(comfort);
+  let nH = scale(noise);
+  let crH = scale(crowd);
 
-  nBar.setAttribute("height", nH);
-  nBar.setAttribute("position", `0 ${nH/2} 0`);
-
-  crBar.setAttribute("height", crH);
-  crBar.setAttribute("position", `0.8 ${crH/2} 0`);
+  animateBar(cBar, cH, -0.8);
+  animateBar(nBar, nH, 0);
+  animateBar(crBar, crH, 0.8);
 }
 
-// decision system
-function evaluate() {
+// -------------------- DECISION --------------------
+function evaluate(){
 
   let score = comfort - noise - crowd;
   let text = document.getElementById("statusText");
 
-  if(score >= 3) {
+  if(score >= 3){
     text.innerText = "✔ Good for Study";
     text.style.color = "#00ffaa";
   }
-  else if(score >= 1) {
-    text.innerText = "⚠️ Moderate Environment";
+  else if(score >= 1){
+    text.innerText = "⚠️ Moderate";
     text.style.color = "yellow";
   }
-  else {
+  else{
     text.innerText = "❌ Not Suitable";
     text.style.color = "red";
   }
 }
 
-// get GPS
-navigator.geolocation.getCurrentPosition(
+// -------------------- LIVE GPS --------------------
+navigator.geolocation.watchPosition(
   (pos) => {
-    setEnvironment(pos.coords.latitude, pos.coords.longitude);
+    let lat = pos.coords.latitude;
+    let lon = pos.coords.longitude;
+
+    setEnvironment(lat, lon);
   },
-  () => {
-    // fallback
-    comfort = 6; noise = 5; crowd = 5;
-    updateBars();
-    evaluate();
-  }
+  (err) => console.log(err),
+  { enableHighAccuracy: true }
 );
+
+// -------------------- CONTINUOUS UPDATE --------------------
+setInterval(() => {
+
+  // simulate small real-world changes
+  comfort = vary(comfort);
+  noise = vary(noise);
+  crowd = vary(crowd);
+
+  updateBars();
+  evaluate();
+
+}, 3000);
 
 </script>
 
